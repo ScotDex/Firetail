@@ -1,21 +1,19 @@
-FROM python:3.6-slim
+FROM python:3.8-slim
 
-# Install required system packages
+# Set the working directory
+WORKDIR /firetail
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
-# Clone the repository
-RUN git clone https://github.com/shibdib/Firetail.git /firetail
+# Copy the Firetail repository into the container
+COPY . /firetail
 
-# Create config directory
-RUN mkdir /config
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir -r /firetail/requirements.txt
 
-# Set environment variables
-ENV CONFIG=/config LOG=/config/bot.log PYTHONPATH=/firetail
-
-# Expose the port for Cloud Run
+# Expose the required port
 EXPOSE 8080
 
-# Define entrypoint
-ENTRYPOINT ["python3", "/firetail/firetail"]
+# Run the bot
+CMD ["python3", "/firetail/firetail"]
