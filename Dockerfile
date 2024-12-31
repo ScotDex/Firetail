@@ -13,6 +13,8 @@ COPY . /firetail
 COPY requirements.txt /firetail/
 RUN pip install --no-cache-dir -r /firetail/requirements.txt
 
+ENV PYTHONPATH=/firetail
+
 # Expose the required port
 EXPOSE 8080
 
