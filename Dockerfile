@@ -1,11 +1,17 @@
-FROM library/python
+# Use a lightweight Python image
+FROM python:3.9-slim
 
+# Install required system dependencies
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Clone the repository, install Python dependencies, and create config directory
 RUN \
     git clone https://github.com/shibdib/Firetail.git /firetail && \
-    pip3 install --process-dependency-links -e /firetail && \
+    pip install -r /firetail/requirements.txt && \
     mkdir /config
 
-# Define the ENV vars the config volume and the entrypoint for the container
+# Set environment variables
 ENV CONFIG=/config LOG=/config/bot.log
-VOLUME [ "/config"]
-ENTRYPOINT [ "python3", "/firetail/firetail"]
+
+# Define entrypoint for the container
+ENTRYPOINT ["python3", "/firetail/firetail.py"]
