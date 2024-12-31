@@ -14,4 +14,4 @@ RUN \
 ENV CONFIG=/config LOG=/config/bot.log
 
 # Define entrypoint for the container
-ENTRYPOINT ["python3", "/firetail/firetail.py"]
+ENTRYPOINT ["python3", "/firetail/firetail"]
