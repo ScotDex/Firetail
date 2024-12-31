@@ -18,4 +18,4 @@ ENV CONFIG=/config LOG=/config/bot.log PYTHONPATH=/firetail
 EXPOSE 8080
 
 # Define entrypoint
-ENTRYPOINT ["python3", "/firetail/firetail/__main__.py"]
+ENTRYPOINT ["python3", "/firetail/firetail"]
