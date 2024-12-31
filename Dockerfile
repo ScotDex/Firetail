@@ -8,7 +8,7 @@ RUN git clone https://github.com/shibdib/Firetail.git /firetail
 
 # Create config directory
 RUN mkdir /config
-
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Set environment variables
