@@ -1,5 +1,5 @@
 # get token from https://discordapp.com/developers/applications/me
-bot_token = ''
+bot_token = 'PuTDGgkZwUfV2MpH2U7c95VWIxsucfAI'
 
 # bot settings
 bot_prefix = ['!']
@@ -76,6 +76,9 @@ welcome_string = (
 #         },
 #         'bbc': {
 #             'uri': 'https://feeds.bbci.co.uk/news/world/rss.xml?edition=uk'
+#         },
+#     },
+# }
 #         },
 #     },
 # }
