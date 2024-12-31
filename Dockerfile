@@ -9,7 +9,7 @@ RUN git clone https://github.com/shibdib/Firetail.git /firetail
 # Create config directory
 RUN mkdir /config
 
-RUN pip install discord.py==1.2.5
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Set environment variables
 ENV CONFIG=/config LOG=/config/bot.log PYTHONPATH=/firetail
