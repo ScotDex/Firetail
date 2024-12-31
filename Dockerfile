@@ -10,10 +10,11 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 COPY . /firetail
 
 # Install Python dependencies
+COPY requirements.txt /firetail/
 RUN pip install --no-cache-dir -r /firetail/requirements.txt
 
 # Expose the required port
 EXPOSE 8080
 
 # Run the bot
-CMD ["python3", "/firetail/firetail"]
+CMD ["python3", "/firetail/firetail/__main__.py"]
