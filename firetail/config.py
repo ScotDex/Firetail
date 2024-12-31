@@ -1,5 +1,7 @@
+Import os
+
 # get token from https://discordapp.com/developers/applications/me
-bot_token = 'MTMyMzc1MTAzNzc2ODY5OTk5NQ.GneOaI.BiuMoSZtsgfQ3pyGXavpkQqVyKzLYlj3kDc3fQ'
+bot_token = os.getenv('BOTTOKEN')
 
 # bot settings
 bot_prefix = ['!']
