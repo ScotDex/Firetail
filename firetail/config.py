@@ -1,4 +1,4 @@
-Import os
+import os
 
 # get token from https://discordapp.com/developers/applications/me
 bot_token = os.getenv('BOTTOKEN')
