@@ -10,6 +10,7 @@ env/
 # Ignore configuration files
 config.py
 .env
+firetail/config.py:3
 
 # Ignore logs and temp files
 *.log
