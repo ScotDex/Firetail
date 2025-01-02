@@ -22,8 +22,8 @@ def colour(*args):
 
 
 def make_embed(
-    msg_type='', title=None, icon=discord.Embed.Empty, content=None, msg_colour=None, guild=None,
-    title_url=discord.Embed.Empty, thumbnail='', image='', fields=None, footer=None, footer_icon=None, inline=False,
+    msg_type='', title=None, icon=None, content=None, msg_colour=None, guild=None,
+    title_url=None, thumbnail='', image='', fields=None, footer=None, footer_icon=None, inline=False,
     subtitle=None, subtitle_url=None
 ):
     """

@@ -1,10 +1,11 @@
 import os
 import sys
+import aiohttp
+import asyncio
+from aiohttp import ClientSession
 from collections import Counter
 from datetime import datetime
 from shutil import copyfile
-
-import aiohttp
 import discord
 from dateutil.relativedelta import relativedelta
 from discord.ext import commands
@@ -12,11 +13,10 @@ from discord.ext import commands
 from firetail.lib import ESI, db
 from firetail.utils import ExitCodes
 
-# Lets check the config file exists before we continue..
+# Ensure the config file exists
 if os.getenv("CONFIG") is not None:
     if not os.path.exists(os.getenv("CONFIG") + "/config.py"):
         print("Copying example_config.py to " + os.getenv("CONFIG") + "/config.py")
-        # for some reason os.getcwd() doesn't work inside a container ??
         copyfile("/firetail/firetail/example_config.py", "/config/config.py")
         sys.exit(1)
 
@@ -30,7 +30,6 @@ else:
 async def prefix_manager(bot, message):
     if not message.guild:
         return commands.when_mentioned_or(bot.default_prefix)(bot, message)
-
     prefix = bot.prefixes.get(message.guild.id) or bot.default_prefix
     return commands.when_mentioned_or(prefix)(bot, message)
 
@@ -52,64 +51,59 @@ class Firetail(commands.Bot):
         self.req_perms = discord.Permissions(config.bot_permissions)
         self.co_owners = config.bot_coowners
         self.preload_ext = config.preload_extensions
+
         kwargs["command_prefix"] = prefix_manager
         kwargs["pm_help"] = True
-        # kwargs["command_prefix"] = self.db.prefix_manager
         kwargs["owner_id"] = self.owner
+        kwargs["intents"] = discord.Intents.all()  # Full intents for all bot functionalities
+
         super().__init__(**kwargs)
-        self.session = aiohttp.ClientSession(loop=self.loop)
-        self.esi_data = ESI(self.session)
-        self.loop.create_task(self.load_db())
+        self.session = None  # To be initialized asynchronously
+        self.esi_data = None
         self.debug = bool(kwargs["debug"])
 
+    async def setup_hook(self):
+        """Initialize asynchronous resources and setup the bot."""
+        self.session = ClientSession()
+        self.esi_data = ESI(self.session)
+        await self.load_db()
+
     async def load_db(self):
+        """Load database and prefixes."""
         await db.create_tables()
         data = await db.select("SELECT * FROM prefixes")
         self.prefixes = dict(data)
 
     async def shutdown(self, *, restart=False):
-        """Shutdown the bot.
-        Safely ends the bot connection while passing the exit code based
-        on if the intention was to restart or close.
-        """
-        if not restart:
-            self._shutdown_mode = ExitCodes.SHUTDOWN
-        else:
-            self._shutdown_mode = ExitCodes.RESTART
+        """Shutdown the bot cleanly."""
+        self._shutdown_mode = ExitCodes.RESTART if restart else ExitCodes.SHUTDOWN
+        if self.session:
+            await self.session.close()
         await self.logout()
 
     @discord.utils.cached_property
     def invite_url(self):
-        invite_url = discord.utils.oauth_url(self.user.id,
-                                             permissions=self.req_perms)
-        return invite_url
+        """Generate the bot's invite URL."""
+        return discord.utils.oauth_url(self.user.id, permissions=self.req_perms)
 
     @property
     def uptime(self):
+        """Calculate the bot's uptime."""
         return relativedelta(datetime.utcnow(), self.launch_time)
 
     @property
     def uptime_str(self):
+        """Format the uptime as a string."""
         uptime = self.uptime
-        year_str, month_str, day_str, hour_str = ('',)*4
-        if uptime.years >= 1:
-            year_str = f"{uptime.years}y "
-        if uptime.months >= 1 or year_str:
-            month_str = f"{uptime.months}m "
-        if uptime.days >= 1 or month_str:
-            d_unit = 'd' if month_str else ' days'
-            day_str = f"{uptime.days}{d_unit} "
-        if uptime.hours >= 1 or day_str:
-            h_unit = ':' if month_str else ' hrs'
-            hour_str = f"{uptime.hours}{h_unit}"
-        m_unit = '' if month_str else ' mins'
-        mins = uptime.minutes if month_str else f' {uptime.minutes}'
-        secs = '' if day_str else f' {uptime.seconds} secs'
-        min_str = f"{mins}{m_unit}{secs}"
-
-        uptime_str = ''.join((year_str, month_str, day_str, hour_str, min_str))
-
-        return uptime_str
+        components = [
+            f"{uptime.years}y" if uptime.years else "",
+            f"{uptime.months}m" if uptime.months else "",
+            f"{uptime.days}d" if uptime.days else "",
+            f"{uptime.hours}h" if uptime.hours else "",
+            f"{uptime.minutes}m" if uptime.minutes else "",
+            f"{uptime.seconds}s" if not uptime.minutes else "",
+        ]
+        return " ".join(filter(None, components))
 
     @property
     def command_count(self):

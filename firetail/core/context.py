@@ -77,8 +77,8 @@ class Context(commands.Context):
             title, details, msg_type='warning', send=send, **options)
 
     async def embed(
-        self, title=None, description=None, plain_msg='', *, title_url=discord.Embed.Empty, colour=None,
-        subtitle=None, subtitle_url=None, icon=discord.Embed.Empty, thumbnail='', image='', fields: dict = None,
+        self, title=None, description=None, plain_msg='', *, title_url=None, colour=None,
+        subtitle=None, subtitle_url=None, icon=None, thumbnail='', image='', fields: dict = None,
         footer=None, footer_icon=None, send=True, inline=False, embed=None, msg_type=None
     ):
         """Send or build an embed using context details."""
