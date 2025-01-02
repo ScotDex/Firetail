@@ -1,16 +1,5 @@
-#!/usr/bin/python3
-"""Firetail - An EVE Online Discord Bot.
-Firetail is a Discord bot for EVE Online communities.
-Firetail is written in python, using v1.0.0 of the discord.py library.
-It's the spiritual successor of Dramiel.
-"""
+from .killmail import Killmail
 
-__version__ = "1.0.0a0"
-__author__ = "shibdib"
-__maintainer__ = "shibdib"
-__status__ = "Development"
 
-# Explicitly import submodules
-from .core import bot, events
-from .utils import *  # Import all utilities (if needed)
-from .extensions import *  # Import all extensions (if needed)
+def setup(bot):
+    bot.add_cog(Killmail(bot))
