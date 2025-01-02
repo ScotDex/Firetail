@@ -3,7 +3,6 @@
 import argparse
 import asyncio
 import sys
-
 import discord
 
 from firetail.core import bot, events
