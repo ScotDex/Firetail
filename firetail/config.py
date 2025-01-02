@@ -1,6 +1,6 @@
 
 # get token from https://discordapp.com/developers/applications/m
-bot_token = ('MTMyMzc1MTAzNzc2ODY5OTk5NQ.GsUmpA.8a0cv2uWqOGWtJ9mfUXsj-3tppLZaqFDmVcrcE')
+bot_token = ('BotToken')
 
 # bot settings
 bot_prefix = ['!']
