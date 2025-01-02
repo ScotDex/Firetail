@@ -1,9 +1,9 @@
 import asyncio
 import json
 import logging
+import websockets
 from typing import Optional
 
-import aiohttp
 import discord
 from discord.ext import commands
 
@@ -75,25 +75,29 @@ class Killmail(commands.Cog):
         asyncio.gather(*[sub.mail(mail) for sub in self.subs.values()])
 
     async def listen_for_mails(self):
-        log.debug("Listening for killmails.")
-        while True:
-            try:
-                await self.get_new_mail()
-            except (json.JSONDecodeError, KeyError):
-                log.exception("Killmail data was badly formed.")
-                pass
-            except aiohttp.ClientError:
-                log.exception("Failure when requesting new mails encountered.")
-                pass
+        """Connect to the zKillboard WebSocket and listen for killmails."""
+        ws_url = "wss://zkillboard.com:2096/"
+        subscription = {
+            "action": "sub",
+            "channel": f"firetail_{self.bot.user.id}",
+        }
 
-    async def get_new_mail(self):
-        url = f"https://redisq.zkillboard.com/listen.php?queueID=firetail_{self.bot.user.id}"
-        async with self.bot.session.get(url) as resp:
-            data = await resp.json()
-            log.debug(json.dumps(data['package'], indent=4))
-        if data['package']:
-            self.km_counter += 1
-            self.process_mail(data['package'])
+        async with websockets.connect(ws_url) as websocket:
+            # Send subscription message
+            await websocket.send(json.dumps(subscription))
+            log.info("Subscribed to zKillboard WebSocket.")
+
+            while True:
+                # Receive messages from the WebSocket
+                message = await websocket.recv()
+                data = json.loads(message)
+
+                # Check if the received data has a package
+                if "package" in data and data["package"]:
+                    self.km_counter += 1
+                    self.process_mail(data["package"])
+                else:
+                    log.debug("No new killmail package received.")
 
     @staticmethod
     async def remove_bad_channel(channel_id):
@@ -206,4 +210,5 @@ class Killmail(commands.Cog):
         await ctx.info(f"Killmails Processed: {self.km_counter:,}")
 
     def cog_unload(self):
-        self.ws_task.cancel()
+        if self.ws_task:
+            self.ws_task.cancel()
