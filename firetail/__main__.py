@@ -4,7 +4,6 @@ import argparse
 import asyncio
 import sys
 import discord
-
 from firetail.core import bot, events
 from firetail.utils import ExitCodes, logger
 
